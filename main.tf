@@ -1,48 +1,51 @@
-terraform {
-  backend "gcs" {
-    bucket = var.bucket_name
-    prefix = "terraform/state"
-  }
+#terraform {
+#  backend "gcs" {
+#    bucket = "terraform-state"
+#    prefix = "terraform/state"
+#  }
+#}
+
+module "gke_cluster" {
+  source         = "github.com/romanfeshchak/tf-google-gke-cluster"
+  GOOGLE_REGION  = var.GOOGLE_REGION
+  GOOGLE_PROJECT = var.GOOGLE_PROJECT
+  GKE_NUM_NODES  = 2
+}
+  
+provider "google" {
+  # Configuration options
+  project = var.GOOGLE_PROJECT
+  region  = var.GOOGLE_REGION
 }
 
-provider "google" {
-  project = var.google_project
-  region  = var.google_region
-  credentials = file(var.google_credentials_file)
-}
+
 
 resource "google_container_cluster" "terraincognitus" {
-  name     = var.cluster_name
-  location = var.google_region
+  name     = var.GKE_CLUSTER_NAME
+  location = var.GOOGLE_REGION
 
-  initial_node_count = var.node_count
-  node_config {
-    machine_type = var.machine_type
-  }
+  initial_node_count       = 1
+  remove_default_node_pool = true
 }
-
-resource "google_compute_network" "kubernetes" {
-  name = var.cluster_name
-}
-
-resource "google_compute_subnetwork" "kubernetes" {
-  name          = var.cluster_name
-  ip_cidr_range = var.cluster_network_cidr_block
-  region        = var.google_region
-  network       = google_compute_network.kubernetes.name
-}
-
 resource "google_container_node_pool" "terraincognitus" {
-  name       = var.node_pool_name
+  name       = var.GKE_POOL_NAME
+  project    = google_container_cluster.terraincognitus.project
   cluster    = google_container_cluster.terraincognitus.name
-  region    = var.google_region
-  node_count = var.node_count
+  location   = google_container_cluster.terraincognitus.location
+  node_count = var.GKE_NUM_NODES
 
   node_config {
-    machine_type = var.machine_type
-    preemptible  = true # Зниження витрат на ноди
+    machine_type = var.GKE_MACHINE_TYPE
   }
-
-  subnetwork = google_compute_subnetwork.kubernetes.name
 }
 
+module "gke_auth" {
+  depends_on = [
+    google_container_cluster.terraincognitus
+  ]
+  source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+  version              = ">= 24.0.0"
+  project_id           = var.GOOGLE_PROJECT
+  cluster_name         = google_container_cluster.terraincognitus.name
+  location             = var.GOOGLE_REGION
+}

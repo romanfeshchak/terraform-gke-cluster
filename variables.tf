@@ -1,37 +1,34 @@
-variable "bucket_name" {
-  type = string
-  default = null
+variable "GOOGLE_PROJECT" {
+  type        = string
+  description = "GCP project name"
 }
 
-variable "google_project" {
-  type = string
+variable "GOOGLE_REGION" {
+  type        = string
+#  default     = "europe-central2-b"
+  description = "GCP region to use"
 }
 
-variable "google_region" {
-  type = string
+variable "GKE_MACHINE_TYPE" {
+  type        = string
+#  default     = "g1-small"
+  description = "Machine type"
 }
 
-variable "cluster_name" {
-  type = string
+variable "GKE_NUM_NODES" {
+  type        = number
+#  default     = 2
+  description = "GKE nodes number"
 }
 
-variable "node_pool_name" {
-  type = string
+variable "GKE_CLUSTER_NAME" {
+  type        = string
+#  default     = "default"
+  description = "GKE cluster name"
 }
 
-variable "node_count" {
-  type = number
-}
-
-variable "machine_type" {
-  type = string
-}
-
-variable "cluster_network_cidr_block" {
-  type = string
-}
-
-variable "google_credentials_file" {
-  type = string
-  default = ""
+variable "GKE_POOL_NAME" {
+  type        = string
+#  default     = "main"
+  description = "GKE pool name"
 }
