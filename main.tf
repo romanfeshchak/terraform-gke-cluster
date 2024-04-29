@@ -11,7 +11,7 @@ module "gke_cluster" {
   GOOGLE_PROJECT = var.GOOGLE_PROJECT
   GKE_NUM_NODES  = 2
 }
-  
+
 provider "google" {
   # Configuration options
   project = var.GOOGLE_PROJECT
@@ -43,9 +43,9 @@ module "gke_auth" {
   depends_on = [
     google_container_cluster.terraincognitus
   ]
-  source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
-  version              = ">= 24.0.0"
-  project_id           = var.GOOGLE_PROJECT
-  cluster_name         = google_container_cluster.terraincognitus.name
-  location             = var.GOOGLE_REGION
+  source       = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+  version      = ">= 24.0.0"
+  project_id   = var.GOOGLE_PROJECT
+  cluster_name = google_container_cluster.terraincognitus.name
+  location     = var.GOOGLE_REGION
 }

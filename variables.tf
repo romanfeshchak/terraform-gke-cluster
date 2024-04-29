@@ -4,31 +4,31 @@ variable "GOOGLE_PROJECT" {
 }
 
 variable "GOOGLE_REGION" {
-  type        = string
-#  default     = "europe-central2-b"
+  type = string
+  default     = "europe-central2-b"
   description = "GCP region to use"
 }
 
 variable "GKE_MACHINE_TYPE" {
-  type        = string
-#  default     = "g1-small"
+  type = string
+  default     = "g1-small"
   description = "Machine type"
 }
 
 variable "GKE_NUM_NODES" {
-  type        = number
-#  default     = 2
+  type = number
+  default     = 2
   description = "GKE nodes number"
 }
 
 variable "GKE_CLUSTER_NAME" {
-  type        = string
-#  default     = "default"
+  type = string
+  default     = "default"
   description = "GKE cluster name"
 }
 
 variable "GKE_POOL_NAME" {
-  type        = string
-#  default     = "main"
+  type = string
+  default     = "terraincognitus"
   description = "GKE pool name"
 }
