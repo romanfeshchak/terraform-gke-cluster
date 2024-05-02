@@ -1,20 +1,24 @@
-module "gke_cluster" {
-  source         = "github.com/romanfeshchak/terraform-gke-cluster"
-  GOOGLE_PROJECT = var.GOOGLE_PROJECT
-  GOOGLE_REGION  = var.GOOGLE_REGION
-  GKE_NUM_NODES  = var.GKE_NUM_NODES
+provider "google" {
+  project     = var.GOOGLE_PROJECT
+  region      = var.GOOGLE_REGION
+  credentials = file(var.SRVC_JSON)
 }
 
-resource "google_compute_global_address" "vpc_ip" {
-  name          = "vpc-ip"
-  purpose       = "VPC_PEERING"
-  address_type  = "EXTERNAL"
-  prefix_length = 16
+module "gke_cluster" {
+  source = "terraform-google-modules/kubernetes-engine/google"
+
+  project_id        = var.GOOGLE_PROJECT
+  region            = var.GOOGLE_REGION
+  network           = google_compute_network.vpc.self_link
+  subnetwork        = google_compute_subnetwork.subnet.self_link
+  name              = var.GKE_CLUSTER_NAME
+  ip_range_pods     = var.GKE_CLUSTER_PODS_IP_RANGE
+  ip_range_services = var.GKE_CLUSTER_SERVICES_IP_RANGE
 }
 
 resource "google_compute_network" "vpc" {
   name                    = var.VPC_NAME
-  auto_create_subnetworks = false 
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnet" {
@@ -24,17 +28,20 @@ resource "google_compute_subnetwork" "subnet" {
   region        = var.GOOGLE_REGION
 }
 
-provider "google" {
-  project     = var.GOOGLE_PROJECT
-  region      = var.GOOGLE_REGION
-}
-
 resource "google_container_cluster" "terraincognitus" {
   name     = var.GKE_CLUSTER_NAME
   location = var.GOOGLE_REGION
 
   initial_node_count       = var.GKE_NUM_NODES
   remove_default_node_pool = true
+
+  network    = google_compute_network.vpc.self_link
+  subnetwork = google_compute_subnetwork.subnet.self_link
+
+  ip_allocation_policy {
+    cluster_secondary_range_name  = var.GKE_PODS_SECONDARY_RANGE_NAME
+    services_secondary_range_name = var.GKE_SERVICES_SECONDARY_RANGE_NAME
+  }
 }
 
 resource "google_container_node_pool" "terraincognitus" {
@@ -54,7 +61,7 @@ resource "google_container_node_pool" "terraincognitus" {
 
 terraform {
   backend "gcs" {
-    bucket  = "terraforms-state"
-    prefix  = "terraform/state"
+    bucket = "terraforms-state"
+    prefix = "terraform/state"
   }
 }
