@@ -46,7 +46,7 @@ module "gke_cluster" {
   ip_range_pods     = var.GKE_CLUSTER_PODS_IP_RANGE_NAME
   ip_range_services = var.GKE_CLUSTER_SERVICES_IP_RANGE_NAME
 
-  depends_on               = [google_container_cluster]
+  depends_on               = [google_container_cluster.terraincognitus]
   
 }
 
