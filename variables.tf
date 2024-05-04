@@ -1,73 +1,74 @@
 variable "GOOGLE_PROJECT" {
+  description = "The ID of the Google Cloud project"
   type        = string
-  description = "The Google Cloud project ID."
 }
 
 variable "GOOGLE_REGION" {
+  description = "The region to deploy resources"
   type        = string
-  description = "The Google Cloud region where the resources will be created."
+}
+
+variable "GOOGLE_ZONE" {
+  description = "The zone to deploy resources"
+  type        = string
 }
 
 variable "SRVC_JSON" {
+  description = "The path to the service account key JSON file"
   type        = string
-  description = "The path to the service account JSON file for Terraform."
-}
-
-variable "GKE_NETWORK" {
-  type        = string
-  description = "The name of the VPC network to be used."
-}
-
-variable "GKE_SUBNETWORK" {
-  type        = string
-  description = "The name of the GKE subnet."
 }
 
 variable "VPC_NAME" {
+  description = "The name of the VPC network"
   type        = string
-  description = "The name of the VPC network to be used."
 }
 
 variable "GKE_CLUSTER_NAME" {
+  description = "The name of the GKE cluster"
   type        = string
-  description = "The name of the GKE cluster to be created."
 }
+
+variable "GKE_SUBNET_NAME" {
+  description = "The name of the GKE subnet"
+  type        = string
+}
+
+variable "GKE_SUBNET_CIDR_BLOCK" {
+  description = "The CIDR block for the GKE subnet"
+  type        = string
+}
+
+variable "GKE_CLUSTER_PODS_IP_RANGE_NAME" {
+  description = "Name of the IP range for pods in the GKE cluster"
+  type        = string
+}
+
+variable "GKE_CLUSTER_SERVICES_IP_RANGE_NAME" {
+  description = "Name of the IP range for services in the GKE cluster"
+  type        = string
+}
+
+variable "GKE_CLUSTER_PODS_IP_RANGE_CIDR" {
+  description = "CIDR block for the IP range for pods in the GKE cluster"
+  type        = string
+}
+
+variable "GKE_CLUSTER_SERVICES_IP_RANGE_CIDR" {
+  description = "CIDR block for the IP range for services in the GKE cluster"
+  type        = string
+}
+
+variable "GKE_MACHINE_TYPE" {
+  description = "The machine type for GKE nodes"
+  type        = string
+}
+
 variable "GKE_POOL_NAME" {
-  description = "The name of the node pool in the GKE cluster."
+  description = "The name of the GKE node pool"
   type        = string
 }
 
 variable "GKE_NUM_NODES" {
+  description = "The number of nodes in the GKE node pool"
   type        = number
-  description = "The number of nodes in the GKE cluster."
-}
-
-variable "GKE_MACHINE_TYPE" {
-  type        = string
-  description = "The machine type for the GKE nodes."
-}
-
-variable "GKE_SUBNET_CIDR_BLOCK" {
-  type        = string
-  description = "The CIDR block for the GKE subnet."
-}
-
-variable "GKE_CLUSTER_PODS_IP_RANGE" {
-  type        = string
-  description = "The IP range for pods in the GKE cluster."
-}
-
-variable "GKE_CLUSTER_SERVICES_IP_RANGE" {
-  type        = string
-  description = "The IP range for services in the GKE cluster."
-}
-
-variable "GKE_PODS_SECONDARY_RANGE_NAME" {
-  type        = string
-  description = "The name of the secondary IP range for pods in the GKE cluster."
-}
-
-variable "GKE_SERVICES_SECONDARY_RANGE_NAME" {
-  type        = string
-  description = "The name of the secondary IP range for services in the GKE cluster."
 }
