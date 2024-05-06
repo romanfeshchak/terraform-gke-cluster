@@ -9,7 +9,7 @@ variable "GOOGLE_REGION" {
 }
 
 variable "GOOGLE_ZONE" {
-  description = "The zone to deploy resources"
+  description = "The region to deploy resources"
   type        = string
 }
 
@@ -70,5 +70,15 @@ variable "GKE_POOL_NAME" {
 
 variable "GKE_NUM_NODES" {
   description = "The number of nodes in the GKE node pool"
+  type        = number
+}
+
+variable "GKE_MIN_COUNT" {
+  description = "The minimum number of nodes in the GKE node pool"
+  type        = number
+}
+
+variable "GKE_MAX_COUNT" {
+  description = "The maximum number of nodes in the GKE node pool"
   type        = number
 }
