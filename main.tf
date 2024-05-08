@@ -92,11 +92,3 @@ resource "local_file" "kubeconfig" {
   filename = "${path.module}/kubeconfig"
   file_permission = "0400"
 }
-
-
-terraform {
-  backend "gcs" {
-    bucket = "terraforms-state"
-    prefix = "terraform/state"
-  }
-}
