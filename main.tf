@@ -3,7 +3,21 @@ provider "google" {
   region      = var.GOOGLE_REGION
   credentials = file(var.SRVC_JSON)
 }
+resource "google_container_cluster" "terra" {
+  name     = var.GKE_CLUSTER_NAME
+  location = var.GOOGLE_REGION
+  initial_node_count       = 1
+  remove_default_node_pool = true
 
+  workload_identity_config {
+    workload_pool = "${var.GOOGLE_PROJECT}.svc.id.goog"
+  }
+  node_config {
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
+  }
+}
 module "gcp-network" {
   source       = "terraform-google-modules/network/google"
   version      = "8.1.0"
@@ -35,9 +49,9 @@ module "gcp-network" {
 module "gke_cluster" {
   source                     = "terraform-google-modules/kubernetes-engine/google"
   version                    = "30.0.0"
-  project_id                 = var.GOOGLE_PROJECT
-  name                       = var.GKE_CLUSTER_NAME
-  region                     = var.GOOGLE_REGION
+  project_id                 = google_container_cluster.terra.project
+  name                       = google_container_cluster.terra.name
+  region                     = google_container_cluster.terra.location
   network                    = module.gcp-network.network_name
   subnetwork                 = module.gcp-network.subnets_names[0]
   remove_default_node_pool   = true
@@ -84,15 +98,15 @@ module "gke_auth" {
   project_id           = var.GOOGLE_PROJECT
   cluster_name         = module.gke_cluster.name
   location             = var.GOOGLE_REGION
-  depends_on           = [module.gke_cluster]
+  depends_on           = [google_container_cluster.terra]
 }
 
-resource "local_file" "kubeconfig" {
-  content  = module.gke_auth.kubeconfig_raw
-  filename = "${path.module}/kubeconfig"
-  file_permission = "0400"
-}
+data "google_client_config" "current" {}
 
+data "google_container_cluster" "main" {
+  name     = google_container_cluster.terra.name
+  location = var.GOOGLE_REGION
+}
 
 terraform {
   backend "gcs" {
