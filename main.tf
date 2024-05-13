@@ -3,9 +3,24 @@ provider "google" {
   region      = var.GOOGLE_REGION
   credentials = file(var.SRVC_JSON)
 }
-resource "google_container_cluster" "terra" {
+
+data "google_client_config" "this" {}
+
+provider "kubernetes" {
+  host                   = "https://${module.gke_cluster.endpoint}"
+  token                  = data.google_client_config.this.access_token
+  cluster_ca_certificate = base64decode(module.gke_cluster.ca_certificate)
+}
+
+resource "google_container_cluster" "this" {
   name     = var.GKE_CLUSTER_NAME
   location = var.GOOGLE_REGION
+  
+  master_auth {
+  client_certificate_config {
+    issue_client_certificate = false
+  }
+}
   initial_node_count       = 1
   remove_default_node_pool = true
 
@@ -18,6 +33,19 @@ resource "google_container_cluster" "terra" {
     }
   }
 }
+
+
+module "gke_auth" {
+  source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+  version              = ">= 24.0.0"
+  project_id           = var.GOOGLE_PROJECT
+  cluster_name         = module.gke_cluster.name
+  location             = var.GOOGLE_REGION
+  depends_on = [ module.gke_cluster ]
+  
+}
+
+
 module "gcp-network" {
   source       = "terraform-google-modules/network/google"
   version      = "8.1.0"
@@ -49,9 +77,9 @@ module "gcp-network" {
 module "gke_cluster" {
   source                     = "terraform-google-modules/kubernetes-engine/google"
   version                    = "30.0.0"
-  project_id                 = google_container_cluster.terra.project
-  name                       = google_container_cluster.terra.name
-  region                     = google_container_cluster.terra.location
+  project_id                 = var.GOOGLE_PROJECT
+  name                       = var.GKE_CLUSTER_NAME
+  region                     = var.GOOGLE_REGION
   network                    = module.gcp-network.network_name
   subnetwork                 = module.gcp-network.subnets_names[0]
   remove_default_node_pool   = true
@@ -75,8 +103,7 @@ module "gke_cluster" {
       auto_repair    = true
       auto_upgrade   = true
       preemptible    = false
-      management = true
-      
+      management     = true
     }
   ]
   node_pools_oauth_scopes = {
@@ -90,22 +117,6 @@ module "gke_cluster" {
     ]
   }
   depends_on = [module.gcp-network]
-}
-
-module "gke_auth" {
-  source               = "terraform-google-modules/kubernetes-engine/google//modules/auth"
-  version              = ">= 24.0.0"
-  project_id           = var.GOOGLE_PROJECT
-  cluster_name         = module.gke_cluster.name
-  location             = var.GOOGLE_REGION
-  depends_on           = [google_container_cluster.terra]
-}
-
-data "google_client_config" "current" {}
-
-data "google_container_cluster" "main" {
-  name     = google_container_cluster.terra.name
-  location = var.GOOGLE_REGION
 }
 
 terraform {

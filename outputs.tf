@@ -1,18 +1,18 @@
+
 output "config_host" {
-  value = "https://${data.google_container_cluster.main.endpoint}"
+  value = "https://${module.gke_cluster.endpoint}"
+  sensitive = true
 }
 
 output "config_token" {
-  value = data.google_client_config.current.access_token
+  value     = data.google_client_config.this.access_token
   sensitive = true
 }
 
 output "config_ca" {
-  value = base64decode(
-    data.google_container_cluster.main.master_auth[0].cluster_ca_certificate,
-  )
+  value = base64decode(google_container_cluster.this.master_auth[0].cluster_ca_certificate)
 }
 
 output "name" {
-  value = google_container_cluster.terra.name
+  value = module.gke_cluster.name
 }
